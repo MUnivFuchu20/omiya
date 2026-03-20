@@ -296,8 +296,9 @@ body {
       <div class="login-card">
         <div class="login-crest">
           <div class="crest-icon">◈</div>
-          <h1>宮崎大学附属中学校<br>第20回卒　同窓会</h1>
-          <p>同窓生専用ページ</p>
+          <h1 id="login-school-name">宮崎大学附属中学校 第20回卒 同窓会</h1>
+          <p id="login-school-name-en" style="color:rgba(201,168,76,0.55);font-size:11px;letter-spacing:0.06em;margin-top:2px;font-family:'Hiragino Sans','Meiryo',sans-serif;"></p>
+          <p style="color:var(--gold);font-size:13px;letter-spacing:0.08em;margin-top:6px;font-family:'Hiragino Sans','Meiryo',sans-serif;">同窓生専用ページ</p>
         </div>
         <div class="login-divider"></div>
         <p class="login-note">本ページは同窓生のみご覧いただけます。<br>パスワードを入力してください。</p>
@@ -521,6 +522,8 @@ body {
 //  GAS API の URL（config.jsonから自動読み込み）
 // ============================================================
 let GAS_URL = '';
+let SITE_TITLE = '';
+let SCHOOL_NAME_EN = '';
 
 // ============================================================
 //  GAS API 呼び出しヘルパー（JSONP）
@@ -571,7 +574,25 @@ const LS_KEY = 'dousoukai_auth_v3';
 window.addEventListener('DOMContentLoaded', () => {
   fetch(`config.json?_=${Date.now()}`)
     .then(r => r.json())
-    .then(cfg => { GAS_URL = cfg.gas_url || ''; startApp(); })
+    .then(cfg => {
+      GAS_URL          = cfg.gas_url        || '';
+      SITE_TITLE       = cfg.site_title     || '';
+      SCHOOL_NAME_EN   = cfg.school_name_en || '';
+      // 認証画面のタイトルをconfig.jsonから反映
+      const title    = SITE_TITLE;
+      const subtitle = SCHOOL_NAME_EN;
+      if (title) {
+        const h1 = document.getElementById('login-school-name');
+        if (h1) h1.textContent = title;
+        document.getElementById('header-title').textContent = title;
+        document.title = title;
+      }
+      if (subtitle) {
+        const p = document.getElementById('login-school-name-en');
+        if (p) p.textContent = subtitle;
+      }
+      startApp();
+    })
     .catch(() => startApp());
 });
 
@@ -653,9 +674,9 @@ const initTopPage = () => {
       bg.classList.add('show');
     }
 
-    // サイトタイトル・英文表記をconfig.iniから反映
-    const siteTitle   = cfg.site_title     || cfg.school_name || '';
-    const schoolNameEn = cfg.school_name_en || '';
+    // サイトタイトル・英文表記はconfig.jsonを優先、なければconfig.iniを使用
+    const siteTitle    = SITE_TITLE      || cfg.site_title     || cfg.school_name || '';
+    const schoolNameEn = SCHOOL_NAME_EN  || cfg.school_name_en || '';
     document.getElementById('header-title').textContent  = siteTitle;
     document.getElementById('hero-title').textContent    = siteTitle;
     document.getElementById('hero-subtitle').textContent = schoolNameEn;
