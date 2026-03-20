@@ -703,17 +703,17 @@ const openKaisai = (folderName) => {
   gasApi('kaisaiDetail', { folder: folderName }).then(res => {
     document.getElementById('kaisai-greeting').textContent = res.greeting || '（挨拶文なし）';
     const list = document.getElementById('photo-folder-list');
-    if (!res.photoFolders || res.photoFolders.length === 0) {
-      list.innerHTML = '<div class="kaisai-empty">写真フォルダがありません</div>';
-      return;
-    }
+    let html = '';
+
     // 写真フォルダボタンを生成
-    let html = res.photoFolders.map(name => {
-      const esc = name.replace(/'/g, "\\'");
-      return `<button class="folder-btn" onclick="openPhotoFolder('${esc}')">
-        <span><span class="folder-icon">📁</span>${name}</span>
-        <span class="btn-arrow">›</span></button>`;
-    }).join('');
+    if (res.photoFolders && res.photoFolders.length > 0) {
+      html += res.photoFolders.map(name => {
+        const esc = name.replace(/'/g, "\\'");
+        return `<button class="folder-btn" onclick="openPhotoFolder('${esc}')">
+          <span><span class="folder-icon">📁</span>${name}</span>
+          <span class="btn-arrow">›</span></button>`;
+      }).join('');
+    }
 
     // albumUrl.txt があれば「アルバムを開く」ボタンを末尾に追加
     if (res.albumUrl) {
@@ -721,6 +721,11 @@ const openKaisai = (folderName) => {
       html += `<button class="album-btn" onclick="window.open('${escUrl}', '_blank', 'noopener')">
         <span>🔗 アルバムを開く</span>
         <span class="btn-arrow">›</span></button>`;
+    }
+
+    // 写真フォルダもアルバムURLも両方なければメッセージ表示
+    if (!html) {
+      html = '<div class="kaisai-empty">写真フォルダがありません</div>';
     }
 
     list.innerHTML = html;
