@@ -9,23 +9,23 @@
    カラーテーマ：葵色・紺色系
    ============================================================ */
 :root {
-  /* ===== 深緑系（大宮高校） ===== */
-  --navy:      #1a3a2a;
-  --navy-mid:  #1f4d32;
-  --aoi:       #2d7a4a;
-  --aoi-light: #3aad6a;
-  --gold:      #c9a84c;
-  --white:     #f8f7f4;
-  --radius:    12px;
-
-  /* ===== 紺色系（附属中学校）参考 =====
+  /* ===== 紺色系（附属中学校） ===== */
   --navy:      #1a2744;
   --navy-mid:  #243258;
   --aoi:       #2d5986;
   --aoi-light: #3a7abf;
   --gold:      #c9a84c;
   --white:     #f8f7f4;
-  ===================================== */
+  --radius:    12px;
+
+  /* ===== 深緑系（大宮高校）参考 =====
+  --navy:      #1a3a2a;
+  --navy-mid:  #1f4d32;
+  --aoi:       #2d7a4a;
+  --aoi-light: #3aad6a;
+  --gold:      #c9a84c;
+  --white:     #f8f7f4;
+  =================================== */
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -534,6 +534,7 @@ body {
 let GAS_URL = '';
 let SITE_TITLE = '';
 let SCHOOL_NAME_EN = '';
+let SITE_ID = 'default';
 
 // ============================================================
 //  GAS API 呼び出しヘルパー（JSONP）
@@ -579,7 +580,7 @@ const showPage = (pageId) => {
 // ============================================================
 //  認証
 // ============================================================
-const LS_KEY = 'dousoukai_auth_v3';
+const getAuthKey = () => `dousoukai_auth_${SITE_ID}_v3`;
 
 window.addEventListener('DOMContentLoaded', () => {
   fetch(`config.json?_=${Date.now()}`)
@@ -588,6 +589,7 @@ window.addEventListener('DOMContentLoaded', () => {
       GAS_URL          = cfg.gas_url        || '';
       SITE_TITLE       = cfg.site_title     || '';
       SCHOOL_NAME_EN   = cfg.school_name_en || '';
+      SITE_ID          = cfg.site_id        || 'default';
       // 認証画面のタイトルをconfig.jsonから反映
       const title    = SITE_TITLE    || '同窓会ホームページ';
       const subtitle = SCHOOL_NAME_EN || '';
@@ -607,12 +609,12 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 const startApp = () => {
-  const saved = localStorage.getItem(LS_KEY);
+  const saved = localStorage.getItem(getAuthKey());
   if (saved) {
     gasApi('verifyToken', { token: saved })
       .then(res => {
         if (res.ok) { showPage('top'); initTopPage(); }
-        else { localStorage.removeItem(LS_KEY); showPage('login'); }
+        else { localStorage.removeItem(getAuthKey()); showPage('login'); }
         hideOverlay();
       })
       .catch(() => { showPage('login'); hideOverlay(); });
@@ -643,7 +645,7 @@ const doLogin = () => {
       btnEl.classList.remove('busy');
       btnEl.textContent = '同窓会HPへ進む';
       if (res.ok) {
-        localStorage.setItem(LS_KEY, res.ok);
+        localStorage.setItem(getAuthKey(), res.ok);
         showPage('top');
         initTopPage();
       } else {
@@ -953,8 +955,8 @@ const initPan = () => {
 // ============================================================
 let songAudio  = null;
 let songReady  = false;
-const SONG_LS_KEY  = 'dousoukai_song_v1';
-const SONG_VER_KEY = 'dousoukai_song_ver_v1';
+const getSongLsKey  = () => `dousoukai_song_${SITE_ID}_v1`;
+const getSongVerKey = () => `dousoukai_song_${SITE_ID}_ver_v1`;
 
 const initSongPage = () => {
   // 校歌情報・歌詞を並列取得
@@ -999,8 +1001,8 @@ const initSongPage = () => {
   gasApi('config').then(cfg => {
     const serverVer = cfg.song_version || '1';
     let cachedData  = null;
-    try { cachedData = localStorage.getItem(SONG_LS_KEY); } catch (_) {}
-    const cachedVer = localStorage.getItem(SONG_VER_KEY);
+    try { cachedData = localStorage.getItem(getSongLsKey()); } catch (_) {}
+    const cachedVer = localStorage.getItem(getSongVerKey());
 
     if (cachedData && cachedVer === serverVer) {
       document.getElementById('player-status').textContent = 'キャッシュから読み込み済み — ▶ を押して再生';
@@ -1013,8 +1015,8 @@ const initSongPage = () => {
           return;
         }
         try {
-          localStorage.setItem(SONG_LS_KEY,  res.data);
-          localStorage.setItem(SONG_VER_KEY, serverVer);
+          localStorage.setItem(getSongLsKey(), res.data);
+          localStorage.setItem(getSongVerKey(), serverVer);
         } catch (_) {}
         setupAudio(res.data);
       }).catch(() => { document.getElementById('player-status').textContent = '取得エラー'; });
