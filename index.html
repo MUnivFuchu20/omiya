@@ -773,8 +773,9 @@ const openKaisai = (folderName) => {
     if (res.pdfFolders && res.pdfFolders.length > 0) {
       html += res.pdfFolders.map(name => {
         const esc = name.replace(/'/g, "\\'");
+        const dispName = name.replace(/^PDF_/, '');
         return `<button class="pdf-folder-btn" onclick="openPdfFolder('${esc}')">
-          <span><span class="folder-icon">📄</span>${name}</span>
+          <span><span class="folder-icon">📄</span>${dispName}</span>
           <span class="btn-arrow">›</span></button>`;
       }).join('');
     }
