@@ -472,7 +472,7 @@ body {
       <div class="viewer-topbar">
         <!-- 1段目：戻る・ナビ・ズーム（PCではファイル名・DLも同じ行） -->
         <div class="viewer-row1">
-          <button class="back-btn vbtn" id="viewer-back-btn" onclick="viewerBack()">◀ 一覧へ戻る</button>
+          <button class="back-btn vbtn" id="viewer-back-btn" onclick="showPage('photos')">◀ 一覧へ戻る</button>
           <button class="nav-btn" id="nav-prev" onclick="viewerNav(-1)">‹</button>
           <span class="viewer-counter" id="viewer-counter">- / -</span>
           <button class="nav-btn" id="nav-next" onclick="viewerNav(1)">›</button>
@@ -929,14 +929,7 @@ const openPhotoFolder = (folderName) => {
 //  写真拡大ビューア
 // ============================================================
 let curPhotoIdx   = 0;
-let viewerFromPost = false;  // 投稿ページから開いたか
-
-const viewerBack = () => {
-  showPage(viewerFromPost ? 'posts' : 'photos');
-};
-
 const openPhoto = (idx) => {
-  viewerFromPost = false;
   curPhotoIdx = idx;
   showPage('photo');
   resetZoom();
@@ -1209,8 +1202,6 @@ const openPostForm = () => {
   }
 };
 
-let postPhotos = [];  // 投稿写真ビューア用
-
 const initPostsPage = () => {
   const list = document.getElementById('posts-list');
   list.innerHTML = '<div class="wait-spin">読み込み中...</div>';
@@ -1220,25 +1211,12 @@ const initPostsPage = () => {
       list.innerHTML = '<div class="post-empty">まだ投稿がありません</div>';
       return;
     }
-    // 全投稿の写真を1つの配列にまとめる（ビューア用）
-    postPhotos = [];
-    posts.forEach(post => {
-      (post.photos || []).forEach(p => {
-        postPhotos.push({
-          fileUrl: p.full  || p.thumb || p,
-          thumb:   p.thumb || p.full  || p,
-          fname:   `${post.cls} ${post.name}`,
-          id:      p.id || ''
-        });
-      });
-    });
-
     list.innerHTML = posts.map(post => {
       const photos = (post.photos || []).map(p => {
-        const thumb = p.thumb || p.full || p;
-        const idx   = postPhotos.findIndex(pp => pp.thumb === thumb);
+        const thumb   = p.thumb   || p;
+        const viewUrl = p.viewUrl || thumb;
         return `<img class="post-photo" src="${thumb}" alt="投稿写真"
-          onclick="openPostPhoto(${idx})">`;
+          onclick="window.open('${viewUrl}', '_blank', 'noopener')">`;
       }).join('');
       return `<div class="post-card">
         <div class="post-header">
@@ -1255,16 +1233,7 @@ const initPostsPage = () => {
   });
 };
 
-// 投稿写真をビューアで開く
-const openPostPhoto = (idx) => {
-  viewerFromPost = true;
-  curPhotos   = postPhotos;
-  curPhotoIdx = idx;
-  showPage('photo');
-  resetZoom();
-  updateViewer();
-  initPan();
-};
+
 
 // ============================================================
 //  ご感想投稿
