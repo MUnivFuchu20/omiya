@@ -167,6 +167,18 @@ body {
 .album-btn { display:flex;align-items:center;justify-content:space-between;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.4);border-radius:var(--radius);padding:16px 20px;cursor:pointer;transition:all 0.2s;color:var(--gold);font-size:14px;letter-spacing:0.06em;text-align:left;width:100%;font-family:'Hiragino Sans','Meiryo',sans-serif; }
 .album-btn:hover { background:rgba(201,168,76,0.16);border-color:var(--gold);transform:translateX(3px); }
 .album-btn .btn-arrow { color:var(--gold);font-size:16px;flex-shrink:0;margin-left:12px; }
+.post-card { background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px; }
+.post-header { display:flex;align-items:center;gap:10px;margin-bottom:10px; }
+.post-class { color:var(--gold);font-size:12px;font-family:'Hiragino Sans','Meiryo',sans-serif;letter-spacing:0.06em; }
+.post-name { color:var(--white);font-size:14px;font-family:'Hiragino Sans','Meiryo',sans-serif; }
+.post-date { color:rgba(248,247,244,0.35);font-size:11px;font-family:'Hiragino Sans','Meiryo',sans-serif;margin-left:auto; }
+.post-comment { color:rgba(248,247,244,0.82);font-size:14px;line-height:1.8;font-family:'Hiragino Sans','Meiryo',sans-serif;margin-bottom:12px;white-space:pre-wrap; }
+.post-photos { display:flex;flex-wrap:wrap;gap:8px; }
+.post-photo { width:120px;height:90px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid rgba(201,168,76,0.15);transition:all 0.2s; }
+.post-photo:hover { border-color:var(--gold);transform:scale(1.03); }
+.post-btn { display:block;width:100%;background:none;border:1px solid rgba(201,168,76,0.35);border-radius:var(--radius);color:var(--gold);font-size:14px;letter-spacing:0.12em;padding:16px;cursor:pointer;transition:all 0.2s;font-family:'Hiragino Sans','Meiryo',sans-serif;text-align:center; }
+.post-btn:hover { background:rgba(201,168,76,0.08);border-color:var(--gold); }
+.post-empty { color:rgba(248,247,244,0.4);font-size:13px;font-family:'Hiragino Sans','Meiryo',sans-serif;padding:20px 0;text-align:center; }
 .pdf-folder-btn { display:flex;align-items:center;justify-content:space-between;background:rgba(180,100,50,0.08);border:1px solid rgba(180,100,50,0.35);border-radius:var(--radius);padding:16px 20px;cursor:pointer;transition:all 0.2s;color:#e8a878;font-size:14px;letter-spacing:0.06em;text-align:left;width:100%;font-family:'Hiragino Sans','Meiryo',sans-serif; }
 .pdf-folder-btn:hover { background:rgba(180,100,50,0.18);border-color:#e8a878;transform:translateX(3px); }
 .pdf-folder-btn .btn-arrow { color:#e8a878;font-size:16px;flex-shrink:0;margin-left:12px; }
@@ -374,6 +386,13 @@ body {
       </div>
       <div class="section-divider"></div>
       <div class="top-section">
+        <div class="section-title">同窓生投稿</div>
+        <button class="post-btn" onclick="showPage('posts')">📷 投稿写真を見る</button>
+        <div style="height:10px;"></div>
+        <button class="post-btn" id="btn-open-form" onclick="openPostForm()" style="margin-top:0;">✏️ 写真を投稿する</button>
+      </div>
+      <div class="section-divider"></div>
+      <div class="top-section">
         <div class="section-title">ご感想等</div>
         <button class="feedback-btn" onclick="showPage('feedback')">✉ ご感想投稿</button>
       </div>
@@ -477,6 +496,17 @@ body {
     </div>
   </div>
 
+  <!-- ⑧ 同窓生投稿閲覧ページ -->
+  <div id="page-posts" class="page">
+    <div class="sub-page">
+      <div class="sticky-back">
+        <button class="back-btn" onclick="showPage('top')">◀ トップ画面へ戻る</button>
+      </div>
+      <div class="page-title">同窓生投稿</div>
+      <div id="posts-list"><div class="wait-spin">読み込み中...</div></div>
+    </div>
+  </div>
+
   <!-- ⑦ ご感想投稿ページ -->
   <div id="page-feedback" class="page">
     <div class="feedback-page">
@@ -485,19 +515,19 @@ body {
       <div class="form-group">
         <label>クラス <span>*</span></label>
         <select id="fb-class" style="color:#f8f7f4;background:#243258;border:1px solid rgba(201,168,76,0.3);border-radius:8px;padding:10px 14px;width:100%;font-size:14px;font-family:'Hiragino Sans','Meiryo',sans-serif;">
-          <option value="" style="color:#f8f7f4;background:#243258;">選択してください</option>
-          <option value="A" style="color:#f8f7f4;background:#243258;">A級</option>
-          <option value="B" style="color:#f8f7f4;background:#243258;">B級</option>
-          <option value="C" style="color:#f8f7f4;background:#243258;">C級</option>
-          <option value="D" style="color:#f8f7f4;background:#243258;">D級</option>
-          <option value="D" style="color:#f8f7f4;background:#243258;">E級</option>
-          <option value="D" style="color:#f8f7f4;background:#243258;">F級</option>
-          <option value="D" style="color:#f8f7f4;background:#243258;">G級</option>
-          <option value="D" style="color:#f8f7f4;background:#243258;">H級</option>
-          <option value="D" style="color:#f8f7f4;background:#243258;">I級</option>
-          <option value="D" style="color:#f8f7f4;background:#243258;">J級</option>
-          <option value="D" style="color:#f8f7f4;background:#243258;">K級</option>
-          <option value="失念した" style="color:#f8f7f4;background:#243258;">失念した</option>
+          <option value="" style="color:#f8f7f4;background:#1f4d32;">選択してください</option>
+          <option value="A級" style="color:#f8f7f4;background:#1f4d32;">A級</option>
+          <option value="B級" style="color:#f8f7f4;background:#1f4d32;">B級</option>
+          <option value="C級" style="color:#f8f7f4;background:#1f4d32;">C級</option>
+          <option value="D級" style="color:#f8f7f4;background:#1f4d32;">D級</option>
+          <option value="E級" style="color:#f8f7f4;background:#1f4d32;">E級</option>
+          <option value="F級" style="color:#f8f7f4;background:#1f4d32;">F級</option>
+          <option value="G級" style="color:#f8f7f4;background:#1f4d32;">G級</option>
+          <option value="H級" style="color:#f8f7f4;background:#1f4d32;">H級</option>
+          <option value="I級" style="color:#f8f7f4;background:#1f4d32;">I級</option>
+          <option value="J級" style="color:#f8f7f4;background:#1f4d32;">J級</option>
+          <option value="K級" style="color:#f8f7f4;background:#1f4d32;">K級</option>
+          <option value="失念した" style="color:#f8f7f4;background:#1f4d32;">失念した</option>
         </select>
       </div>
       <div class="form-group">
@@ -588,7 +618,7 @@ const gasApi = (action, params = {}) => new Promise((resolve, reject) => {
 // ============================================================
 //  ページ管理
 // ============================================================
-const PAGE_IDS = ['login','top','song','kaisai','photos','pdfs','photo','feedback','feedback-confirm'];
+const PAGE_IDS = ['login','top','song','kaisai','photos','pdfs','photo','posts','feedback','feedback-confirm'];
 const showPage = (pageId) => {
   PAGE_IDS.forEach(id => {
     const el = document.getElementById(`page-${id}`);
@@ -601,6 +631,7 @@ const showPage = (pageId) => {
   meta.content = pageId === 'photo'
     ? 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
     : 'width=device-width, initial-scale=1';
+  if (pageId === 'posts') initPostsPage();
 };
 
 // ============================================================
@@ -738,6 +769,9 @@ const initTopPage = () => {
 
     // 次回同窓会のご案内
     document.getElementById('next-kaisai-text').textContent = nextRes.text || '次回同窓会開催は未定です。';
+
+    // 投稿フォームURLをキャッシュ
+    POST_FORM_URL = cfg.post_form_url || '';
 
     // フッター（config.iniのfooter_copy・contact情報を使用）
     const footerCopy = cfg.footer_copy || siteTitle;
@@ -1145,6 +1179,55 @@ const fmtTime = (s) => {
   if (isNaN(s)) return '--:--';
   const m = Math.floor(s / 60), r = Math.floor(s % 60);
   return `${m}:${r < 10 ? '0' : ''}${r}`;
+};
+
+// ============================================================
+//  同窓生投稿
+// ============================================================
+let POST_FORM_URL = '';
+
+const openPostForm = () => {
+  if (POST_FORM_URL) {
+    window.open(POST_FORM_URL, '_blank', 'noopener');
+  } else {
+    gasApi('config').then(cfg => {
+      POST_FORM_URL = cfg.post_form_url || '';
+      if (POST_FORM_URL) {
+        window.open(POST_FORM_URL, '_blank', 'noopener');
+      } else {
+        alert('投稿フォームのURLが設定されていません');
+      }
+    });
+  }
+};
+
+const initPostsPage = () => {
+  const list = document.getElementById('posts-list');
+  list.innerHTML = '<div class="wait-spin">読み込み中...</div>';
+  gasApi('postList').then(res => {
+    const posts = res.posts || [];
+    if (posts.length === 0) {
+      list.innerHTML = '<div class="post-empty">まだ投稿がありません</div>';
+      return;
+    }
+    list.innerHTML = posts.map(post => {
+      const photos = (post.photos || []).map(url =>
+        `<img class="post-photo" src="${url}" alt="投稿写真"
+          onclick="window.open('${url}', '_blank', 'noopener')">`
+      ).join('');
+      return `<div class="post-card">
+        <div class="post-header">
+          <span class="post-class">${post.cls}</span>
+          <span class="post-name">${post.name}</span>
+          <span class="post-date">${post.date}</span>
+        </div>
+        <div class="post-comment">${post.comment}</div>
+        ${photos ? `<div class="post-photos">${photos}</div>` : ''}
+      </div>`;
+    }).join('');
+  }).catch(() => {
+    list.innerHTML = '<div class="post-empty">読み込みエラーが発生しました</div>';
+  });
 };
 
 // ============================================================
