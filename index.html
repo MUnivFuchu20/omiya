@@ -1209,7 +1209,7 @@ const openPostForm = () => {
   }
 };
 
-// 投稿写真ビューア用（投稿単位で管理）
+// 投稿写真一覧（Lazy Load + 別ウィンドウ拡大）
 const initPostsPage = () => {
   const list = document.getElementById('posts-list');
   list.innerHTML = '<div class="wait-spin">読み込み中...</div>';
@@ -1219,16 +1219,19 @@ const initPostsPage = () => {
       list.innerHTML = '<div class="post-empty">まだ投稿がありません</div>';
       return;
     }
+
+    // 投稿単位の写真配列を保持
+    window._postPhotosMap = posts.map(post =>
+      (post.photos || []).map(p => ({
+        full:  p.full  || p.thumb || p,
+        thumb: p.thumb || p
+      }))
+    );
+
+    // Lazy Load：data-src属性でサムネイルを遅延読み込み
     list.innerHTML = posts.map((post, postIdx) => {
-      // 投稿単位の写真配列を作成
-      const postPhotosArr = (post.photos || []).map(p => ({
-        fileUrl: p.full  || p.thumb || p,
-        thumb:   p.thumb || p,
-        fname:   `${post.cls} ${post.name}`,
-        id:      p.id || ''
-      }));
-      const photos = postPhotosArr.map((photo, photoIdx) =>
-        `<img class="post-photo" src="${photo.thumb}" alt="投稿写真"
+      const photos = (window._postPhotosMap[postIdx] || []).map((p, photoIdx) =>
+        `<img class="post-photo" data-src="${p.thumb}" alt="投稿写真"
           onclick="openPostPhoto(${postIdx}, ${photoIdx})">`
       ).join('');
       return `<div class="post-card">
@@ -1242,29 +1245,71 @@ const initPostsPage = () => {
       </div>`;
     }).join('');
 
-    // 投稿単位の写真配列をdata属性で保持
-    window._postPhotosMap = posts.map(post =>
-      (post.photos || []).map(p => ({
-        fileUrl: p.full  || p.thumb || p,
-        thumb:   p.thumb || p,
-        fname:   `${post.cls} ${post.name}`,
-        id:      p.id || ''
-      }))
-    );
+    // IntersectionObserverでLazy Load
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          const img = entry.target;
+          const src = img.getAttribute('data-src');
+          if (src) { img.src = src; img.removeAttribute('data-src'); }
+          obs.unobserve(img);
+        });
+      }, { rootMargin: '100px' });
+      list.querySelectorAll('img[data-src]').forEach(img => obs.observe(img));
+    } else {
+      list.querySelectorAll('img[data-src]').forEach(img => {
+        img.src = img.getAttribute('data-src');
+        img.removeAttribute('data-src');
+      });
+    }
   }).catch(() => {
     list.innerHTML = '<div class="post-empty">読み込みエラーが発生しました</div>';
   });
 };
 
-// 投稿写真をビューアで開く（投稿単位）
+// 投稿写真を別ウィンドウで開く（投稿単位・ナビ付きHTMLを生成）
 const openPostPhoto = (postIdx, photoIdx) => {
-  curPhotos      = window._postPhotosMap[postIdx] || [];
-  curPhotoIdx    = photoIdx;
-  viewerFromPost = true;
-  showPage('photo');
-  resetZoom();
-  updateViewer();
-  initPan();
+  const photos = window._postPhotosMap[postIdx] || [];
+  if (!photos.length) return;
+
+  // シンプルなHTMLビューアを別ウィンドウで開く
+  const html = `<!DOCTYPE html><html lang="ja">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>投稿写真</title>
+<style>
+  body{margin:0;background:#000;display:flex;flex-direction:column;height:100vh;font-family:sans-serif;}
+  #toolbar{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(0,0,0,0.8);color:#c9a84c;flex-shrink:0;}
+  #toolbar button{background:rgba(255,255,255,0.1);border:1px solid rgba(201,168,76,0.4);color:#c9a84c;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:13px;}
+  #toolbar button:hover{background:rgba(201,168,76,0.2);}
+  #counter{font-size:13px;min-width:40px;text-align:center;}
+  #close-btn{margin-left:auto;}
+  #img-wrap{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  #img-wrap img{max-width:100%;max-height:100%;object-fit:contain;}
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <button onclick="nav(-1)">‹</button>
+  <span id="counter">${photoIdx+1}/${photos.length}</span>
+  <button onclick="nav(1)">›</button>
+  <button id="close-btn" onclick="window.close()">✕ 閉じる</button>
+</div>
+<div id="img-wrap"><img id="photo" src="${photos[photoIdx].full}" alt="投稿写真"></div>
+<script>
+  let idx = ${photoIdx};
+  const photos = ${JSON.stringify(photos)};
+  function nav(d){
+    idx = Math.max(0, Math.min(photos.length-1, idx+d));
+    document.getElementById('photo').src = photos[idx].full;
+    document.getElementById('counter').textContent = (idx+1)+'/'+photos.length;
+  }
+<\/script>
+</body></html>`;
+
+  const w = window.open('', '_blank', 'width=900,height=700');
+  if (w) { w.document.write(html); w.document.close(); }
 };
 
 
