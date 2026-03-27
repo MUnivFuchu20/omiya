@@ -186,8 +186,9 @@ body {
 .post-overlay-bar button:hover { background:rgba(201,168,76,0.2); }
 .post-overlay-counter { color:var(--gold);font-size:13px;min-width:50px;text-align:center; }
 .post-overlay-close { margin-left:auto; }
-.post-overlay-img { flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden; }
-.post-overlay-img img { max-width:100%;max-height:100%;object-fit:contain;transition:transform 0.2s;transform-origin:center center; }
+.post-overlay-img { flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:grab; }
+.post-overlay-img img { max-width:100%;max-height:100%;object-fit:contain;transform-origin:center center;user-select:none; }
+.post-overlay-img.dragging { cursor:grabbing; }
 .post-overlay-zoom { color:var(--gold);font-size:13px;min-width:36px;text-align:center; }
 .pdf-folder-btn { display:flex;align-items:center;justify-content:space-between;background:rgba(180,100,50,0.08);border:1px solid rgba(180,100,50,0.35);border-radius:var(--radius);padding:16px 20px;cursor:pointer;transition:all 0.2s;color:#e8a878;font-size:14px;letter-spacing:0.06em;text-align:left;width:100%;font-family:'Hiragino Sans','Meiryo',sans-serif; }
 .pdf-folder-btn:hover { background:rgba(180,100,50,0.18);border-color:#e8a878;transform:translateX(3px); }
@@ -529,7 +530,7 @@ body {
       <button onclick="postOverlayZoom(1)">＋</button>
       <button class="post-overlay-close" onclick="closePostOverlay()">✕ 閉じる</button>
     </div>
-    <div class="post-overlay-img">
+    <div class="post-overlay-img" id="post-overlay-wrap">
       <img id="post-overlay-img" src="" alt="投稿写真">
     </div>
   </div>
@@ -1302,8 +1303,10 @@ const openPostPhoto = (postIdx, photoIdx) => {
   _overlayPhotos = window._postPhotosMap[postIdx] || [];
   if (!_overlayPhotos.length) return;
   _overlayIdx = photoIdx;
+  _overlayResetZoomPan();
   updatePostOverlay();
   document.getElementById('post-overlay').classList.add('show');
+  _initOverlayPan();
 };
 
 const updatePostOverlay = () => {
@@ -1311,10 +1314,8 @@ const updatePostOverlay = () => {
   document.getElementById('post-overlay-img').src = p.full || p.thumb;
   document.getElementById('post-overlay-counter').textContent =
     `${_overlayIdx + 1}/${_overlayPhotos.length}`;
-  // 写真切り替え時にズームリセット
-  _overlayZoom = 1;
-  document.getElementById('post-overlay-img').style.transform = '';
-  document.getElementById('post-overlay-zoom').textContent = '100%';
+  // 写真切り替え時にズーム・panリセット
+  _overlayResetZoomPan();
   // ナビボタンの活性制御
   const btns = document.querySelectorAll('.post-overlay-bar button');
   btns[0].style.opacity = _overlayIdx === 0 ? '0.3' : '1';
@@ -1328,25 +1329,85 @@ const postOverlayNav = (dir) => {
   updatePostOverlay();
 };
 
-const closePostOverlay = () => {
-  document.getElementById('post-overlay').classList.remove('show');
-  document.getElementById('post-overlay-img').src = '';
-  _overlayZoom = 1;
-  document.getElementById('post-overlay-img').style.transform = '';
-  document.getElementById('post-overlay-zoom').textContent = '100%';
+// オーバーレイ ズーム・パン
+let _overlayZoom  = 1;
+let _overlayPanX  = 0, _overlayPanY = 0;
+let _overlayDrag  = false;
+let _overlayDragStartX = 0, _overlayDragStartY = 0;
+let _overlayPanStartX  = 0, _overlayPanStartY  = 0;
+const _overlayZoomSteps = [0.5, 0.75, 1, 1.5, 2, 3];
+
+const _overlayApply = () => {
+  const img  = document.getElementById('post-overlay-img');
+  const wrap = document.getElementById('post-overlay-wrap');
+  if (!img) return;
+  img.style.transform = (_overlayPanX === 0 && _overlayPanY === 0 && _overlayZoom === 1)
+    ? '' : `scale(${_overlayZoom}) translate(${_overlayPanX / _overlayZoom}px, ${_overlayPanY / _overlayZoom}px)`;
+  document.getElementById('post-overlay-zoom').textContent = `${Math.round(_overlayZoom * 100)}%`;
+  if (wrap) wrap.style.cursor = _overlayDrag ? 'grabbing' : (_overlayZoom > 1 ? 'grab' : 'default');
 };
 
-// オーバーレイズーム
-let _overlayZoom = 1;
-const _overlayZoomSteps = [0.5, 0.75, 1, 1.5, 2, 3];
+const _overlayResetZoomPan = () => {
+  _overlayZoom = 1; _overlayPanX = 0; _overlayPanY = 0;
+  _overlayApply();
+};
+
 const postOverlayZoom = (dir) => {
   const idx    = _overlayZoomSteps.indexOf(_overlayZoom);
   const newIdx = Math.max(0, Math.min(_overlayZoomSteps.length - 1, idx + dir));
   _overlayZoom = _overlayZoomSteps[newIdx];
-  document.getElementById('post-overlay-img').style.transform =
-    _overlayZoom === 1 ? '' : `scale(${_overlayZoom})`;
-  document.getElementById('post-overlay-zoom').textContent =
-    `${Math.round(_overlayZoom * 100)}%`;
+  if (_overlayZoom === 1) { _overlayPanX = 0; _overlayPanY = 0; }
+  _overlayApply();
+};
+
+const closePostOverlay = () => {
+  document.getElementById('post-overlay').classList.remove('show');
+  document.getElementById('post-overlay-img').src = '';
+  _overlayResetZoomPan();
+};
+
+// オーバーレイのpan初期化（一度だけ実行）
+let _overlayPanInited = false;
+const _initOverlayPan = () => {
+  if (_overlayPanInited) return;
+  _overlayPanInited = true;
+  const wrap = document.getElementById('post-overlay-wrap');
+  if (!wrap) return;
+
+  // マウス操作
+  wrap.addEventListener('mousedown', e => {
+    if (_overlayZoom <= 1) return;
+    _overlayDrag = true;
+    _overlayDragStartX = e.clientX; _overlayDragStartY = e.clientY;
+    _overlayPanStartX  = _overlayPanX; _overlayPanStartY = _overlayPanY;
+    _overlayApply(); e.preventDefault();
+  });
+  window.addEventListener('mousemove', e => {
+    if (!_overlayDrag) return;
+    _overlayPanX = _overlayPanStartX + (e.clientX - _overlayDragStartX);
+    _overlayPanY = _overlayPanStartY + (e.clientY - _overlayDragStartY);
+    _overlayApply();
+  });
+  window.addEventListener('mouseup', () => {
+    if (!_overlayDrag) return;
+    _overlayDrag = false; _overlayApply();
+  });
+
+  // タッチ操作
+  let _tStartX = 0, _tStartY = 0;
+  wrap.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1 || _overlayZoom <= 1) return;
+    _tStartX = e.touches[0].clientX; _tStartY = e.touches[0].clientY;
+    _overlayPanStartX = _overlayPanX; _overlayPanStartY = _overlayPanY;
+    e.preventDefault();
+  }, { passive: false });
+  wrap.addEventListener('touchmove', e => {
+    if (e.touches.length !== 1 || _overlayZoom <= 1) return;
+    _overlayPanX = _overlayPanStartX + (e.touches[0].clientX - _tStartX);
+    _overlayPanY = _overlayPanStartY + (e.touches[0].clientY - _tStartY);
+    _overlayApply(); e.preventDefault();
+  }, { passive: false });
+  wrap.addEventListener('touchend', () => { _overlayDrag = false; });
 };
 
 
