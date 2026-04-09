@@ -1,4 +1,12 @@
 <!DOCTYPE html>
+<!--
+  ============================================================
+  同窓会ホームページ index.html
+  対象：宮崎県立大宮高等学校 四六会
+  最終更新：2026/04/09 00:07:24
+  更新内容：XSS対策（escHtml）追加
+  ============================================================
+-->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -1236,6 +1244,18 @@ const openPostForm = () => {
   }
 };
 
+// ============================================================
+//  XSS対策：HTMLエスケープ関数
+//  同窓生の投稿内容（コメント・氏名・クラス）を画面に表示する際、
+//  悪意あるスクリプトが実行されないようにHTMLの特殊文字を無害化する。
+// ============================================================
+const escHtml = (str) => String(str ?? '')
+  .replace(/&/g,  '&amp;')   // & を先に変換（他の変換結果を二重変換しないよう最初に）
+  .replace(/</g,  '&lt;')    // < を無害化（タグの開始文字）
+  .replace(/>/g,  '&gt;')    // > を無害化（タグの終了文字）
+  .replace(/"/g,  '&quot;')  // " を無害化（属性値内のダブルクォート）
+  .replace(/'/g,  '&#39;');  // ' を無害化（属性値内のシングルクォート）
+
 // 投稿写真一覧（Lazy Load + 別ウィンドウ拡大）
 const initPostsPage = () => {
   const list = document.getElementById('posts-list');
@@ -1261,13 +1281,14 @@ const initPostsPage = () => {
         `<img class="post-photo" data-src="${p.thumb}" alt="投稿写真"
           onclick="openPostPhoto(${postIdx}, ${photoIdx})">`
       ).join('');
+      // XSS対策：投稿者情報・コメントはescHtmlでエスケープしてから表示
       return `<div class="post-card">
         <div class="post-header">
-          <span class="post-class">${post.cls}</span>
-          <span class="post-name">${post.name}</span>
-          <span class="post-date">${post.date}</span>
+          <span class="post-class">${escHtml(post.cls)}</span>
+          <span class="post-name">${escHtml(post.name)}</span>
+          <span class="post-date">${escHtml(post.date)}</span>
         </div>
-        <div class="post-comment">${post.comment}</div>
+        <div class="post-comment">${escHtml(post.comment)}</div>
         ${photos ? `<div class="post-photos">${photos}</div>` : ''}
       </div>`;
     }).join('');
