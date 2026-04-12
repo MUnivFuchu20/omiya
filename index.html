@@ -3,8 +3,8 @@
   ============================================================
   同窓会ホームページ index.html
   対象：宮崎県立大宮高等学校 四六会
-  最終更新：2026/04/12 11:34:21
-  更新内容：シロクマン動画・新着情報追加
+  最終更新：2026/04/12 11:44:09
+  更新内容：新着情報順序修正・シロクマン動画iframe方式に変更
   ============================================================
 -->
 <html lang="ja">
@@ -141,9 +141,9 @@ body {
 .sinchaku-item:last-child { border-bottom:none; }
 .sinchaku-date { color:var(--gold);flex-shrink:0;font-size:12px;padding-top:1px; }
 .sinchaku-text { color:rgba(248,247,244,0.82); }
-.shiro-wrap { float:right;margin:0 0 12px 16px;width:180px; }
-.shiro-wrap video { width:100%;border-radius:8px;opacity:0.92; }
-@media(max-width:480px){ .shiro-wrap { width:120px;margin:0 0 8px 10px; } }
+.shiro-wrap { float:right;margin:0 0 12px 16px;width:180px;border-radius:8px;overflow:hidden; }
+.shiro-wrap iframe { width:180px;height:320px;border:none;border-radius:8px; }
+@media(max-width:480px){ .shiro-wrap { width:120px;margin:0 0 8px 10px; } .shiro-wrap iframe { width:120px;height:213px; } }
 
 /* ===== 校歌ページ ===== */
 .song-page { max-width:800px;margin:0 auto;padding:32px 24px 48px; }
@@ -385,9 +385,9 @@ body {
     <div class="top-content">
       <div class="top-section">
         <div class="section-title">本ホームページについて</div>
-        <!-- シロクマン動画（テキストの右側にfloat） -->
+        <!-- シロクマン動画（テキストの右側にfloat・iframeで埋め込み） -->
         <div class="shiro-wrap" id="shiro-wrap" style="display:none;">
-          <video id="shiro-video" autoplay loop muted playsinline></video>
+          <iframe id="shiro-video" allow="autoplay" allowfullscreen></iframe>
         </div>
         <div class="top-about-text" id="about-text">読み込み中...</div>
         <div style="clear:both;"></div>
@@ -813,11 +813,13 @@ const initTopPage = () => {
     document.getElementById('about-text').textContent = topTextRes.text || '（未設定）';
 
     // シロクマン動画（大宮のみ）
+    // GoogleドライブのfileIdをiframeのpreviewURLに設定してLoop再生
     if (shiroRes && shiroRes.url) {
-      const wrap  = document.getElementById('shiro-wrap');
-      const video = document.getElementById('shiro-video');
-      if (wrap && video) {
-        video.src = shiroRes.url;
+      const wrap   = document.getElementById('shiro-wrap');
+      const iframe = document.getElementById('shiro-video');
+      if (wrap && iframe) {
+        // /previewはGoogleドライブの動画プレビューURL（自動再生・ループ対応）
+        iframe.src = `https://drive.google.com/file/d/${shiroRes.url}/preview?autoplay=1&loop=1`;
         wrap.style.display = 'block';
       }
     }
@@ -836,7 +838,7 @@ const initTopPage = () => {
           ? { date: l.substring(0, tab).trim(), text: escHtml(l.substring(tab + 1).trim()) }
           : { date: '', text: escHtml(l) };
       })
-      .reverse();  // 新着順（末尾が最新）
+      ;  // sinchaku.txtは上が最新のため並び替え不要
     if (sinchakuItems.length === 0) {
       sinchakuBox.innerHTML = '<div class="kaisai-empty">新着情報はありません</div>';
     } else {
