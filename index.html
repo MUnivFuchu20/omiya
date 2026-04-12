@@ -3,8 +3,8 @@
   ============================================================
   同窓会ホームページ index.html
   対象：宮崎県立大宮高等学校 四六会
-  最終更新：2026/04/12 11:53:12
-  更新内容：新着情報日付揃え修正・動画base64方式に変更
+  最終更新：2026/04/12 12:04:30
+  更新内容：新着情報日付幅固定・シロクマン位置とサイズ調整
   ============================================================
 -->
 <html lang="ja">
@@ -139,11 +139,11 @@ body {
 .sinchaku-box { background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.15);border-radius:var(--radius);padding:12px 16px;max-height:120px;overflow-y:auto;font-family:'Hiragino Sans','Meiryo',sans-serif; }
 .sinchaku-item { display:flex;gap:12px;padding:4px 0;border-bottom:1px solid rgba(201,168,76,0.08);font-size:13px;line-height:1.6; }
 .sinchaku-item:last-child { border-bottom:none; }
-.sinchaku-date { color:var(--gold);flex-shrink:0;font-size:12px;padding-top:1px; }
+.sinchaku-date { color:var(--gold);flex-shrink:0;font-size:12px;padding-top:1px;min-width:80px;display:inline-block; }
 .sinchaku-text { color:rgba(248,247,244,0.82); }
-.shiro-wrap { float:right;margin:0 0 12px 16px;width:160px;border-radius:8px;overflow:hidden; }
-.shiro-wrap video { width:160px;height:160px;border-radius:8px;object-fit:cover; }
-@media(max-width:480px){ .shiro-wrap { width:110px;margin:0 0 8px 10px; } .shiro-wrap video { width:110px;height:110px; } }
+.shiro-wrap { margin:16px auto 0;width:120px;border-radius:8px;overflow:hidden;display:block; }
+.shiro-wrap video { width:120px;height:120px;border-radius:8px;object-fit:cover;display:block; }
+@media(max-width:480px){ .shiro-wrap { width:100px; } .shiro-wrap video { width:100px;height:100px; } }
 
 /* ===== 校歌ページ ===== */
 .song-page { max-width:800px;margin:0 auto;padding:32px 24px 48px; }
@@ -385,12 +385,11 @@ body {
     <div class="top-content">
       <div class="top-section">
         <div class="section-title">本ホームページについて</div>
-        <!-- シロクマン動画（テキストの右側にfloat・base64で埋め込み） -->
+        <div class="top-about-text" id="about-text">読み込み中...</div>
+        <!-- シロクマン動画（テキストの下・セクション末尾に配置） -->
         <div class="shiro-wrap" id="shiro-wrap" style="display:none;">
           <video id="shiro-video" autoplay loop muted playsinline></video>
         </div>
-        <div class="top-about-text" id="about-text">読み込み中...</div>
-        <div style="clear:both;"></div>
       </div>
       <div class="section-divider"></div>
       <div class="top-section">
