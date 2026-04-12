@@ -3,8 +3,8 @@
   ============================================================
   同窓会ホームページ index.html
   対象：宮崎県立大宮高等学校 四六会
-  最終更新：2026/04/12 12:04:30
-  更新内容：新着情報日付幅固定・シロクマン位置とサイズ調整
+  最終更新：2026/04/12 12:11:34
+  更新内容：シロクマンをテキスト右側・最下段揃えに変更
   ============================================================
 -->
 <html lang="ja">
@@ -141,9 +141,11 @@ body {
 .sinchaku-item:last-child { border-bottom:none; }
 .sinchaku-date { color:var(--gold);flex-shrink:0;font-size:12px;padding-top:1px;min-width:80px;display:inline-block; }
 .sinchaku-text { color:rgba(248,247,244,0.82); }
-.shiro-wrap { margin:16px auto 0;width:120px;border-radius:8px;overflow:hidden;display:block; }
+.about-flex { display:flex;align-items:flex-end;gap:16px; }
+.about-flex .top-about-text { flex:1; }
+.shiro-wrap { flex-shrink:0;width:120px;border-radius:8px;overflow:hidden; }
 .shiro-wrap video { width:120px;height:120px;border-radius:8px;object-fit:cover;display:block; }
-@media(max-width:480px){ .shiro-wrap { width:100px; } .shiro-wrap video { width:100px;height:100px; } }
+@media(max-width:480px){ .shiro-wrap { width:90px; } .shiro-wrap video { width:90px;height:90px; } }
 
 /* ===== 校歌ページ ===== */
 .song-page { max-width:800px;margin:0 auto;padding:32px 24px 48px; }
@@ -385,10 +387,12 @@ body {
     <div class="top-content">
       <div class="top-section">
         <div class="section-title">本ホームページについて</div>
-        <div class="top-about-text" id="about-text">読み込み中...</div>
-        <!-- シロクマン動画（テキストの下・セクション末尾に配置） -->
-        <div class="shiro-wrap" id="shiro-wrap" style="display:none;">
-          <video id="shiro-video" autoplay loop muted playsinline></video>
+        <div class="about-flex">
+          <div class="top-about-text" id="about-text">読み込み中...</div>
+          <!-- シロクマン動画（テキスト右側・最下段に揃えて配置） -->
+          <div class="shiro-wrap" id="shiro-wrap" style="display:none;">
+            <video id="shiro-video" autoplay loop muted playsinline></video>
+          </div>
         </div>
       </div>
       <div class="section-divider"></div>
