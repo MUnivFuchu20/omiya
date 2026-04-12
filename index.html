@@ -3,8 +3,8 @@
   ============================================================
   同窓会ホームページ index.html
   対象：宮崎県立大宮高等学校 四六会
-  最終更新：2026/04/12 12:20:31
-  更新内容：シロクマンにテキスト回り込み
+  最終更新：2026/04/12 12:24:15
+  更新内容：シロクマンをCSS gridで右下揃えに変更
   ============================================================
 -->
 <html lang="ja">
@@ -141,11 +141,10 @@ body {
 .sinchaku-item:last-child { border-bottom:none; }
 .sinchaku-date { color:var(--gold);flex-shrink:0;font-size:12px;padding-top:1px;min-width:80px;display:inline-block; }
 .sinchaku-text { color:rgba(248,247,244,0.82); }
-.about-flex { display:block; }
-.shiro-wrap { float:right;margin:0 0 8px 16px;width:120px;border-radius:8px;overflow:hidden; }
+.about-flex { display:grid;grid-template-columns:1fr 120px;gap:16px;align-items:end; }
+.shiro-wrap { width:120px;border-radius:8px;overflow:hidden; }
 .shiro-wrap video { width:120px;height:120px;border-radius:8px;object-fit:cover;display:block; }
-.about-flex::after { content:'';display:block;clear:both; }
-@media(max-width:480px){ .shiro-wrap { width:90px;margin:0 0 6px 10px; } .shiro-wrap video { width:90px;height:90px; } }
+@media(max-width:480px){ .about-flex { grid-template-columns:1fr 90px;gap:10px; } .shiro-wrap { width:90px; } .shiro-wrap video { width:90px;height:90px; } }
 
 /* ===== 校歌ページ ===== */
 .song-page { max-width:800px;margin:0 auto;padding:32px 24px 48px; }
@@ -388,11 +387,11 @@ body {
       <div class="top-section">
         <div class="section-title">本ホームページについて</div>
         <div class="about-flex">
-          <!-- シロクマン動画（右側にfloat・テキストが回り込む） -->
+          <!-- テキスト左・シロクマン動画右下揃え（CSS gridで制御） -->
+          <div class="top-about-text" id="about-text">読み込み中...</div>
           <div class="shiro-wrap" id="shiro-wrap" style="display:none;">
             <video id="shiro-video" autoplay loop muted playsinline></video>
           </div>
-          <div class="top-about-text" id="about-text">読み込み中...</div>
         </div>
       </div>
       <div class="section-divider"></div>
