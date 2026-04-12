@@ -3,8 +3,8 @@
   ============================================================
   同窓会ホームページ index.html
   対象：宮崎県立大宮高等学校 四六会
-  最終更新：2026/04/12 12:28:33
-  更新内容：シロクマンfloat回り込み＋JS下揃え
+  最終更新：2026/04/12 12:38:04
+  更新内容：シロクマン動画localStorageキャッシュ追加
   ============================================================
 -->
 <html lang="ja">
@@ -816,24 +816,42 @@ const initTopPage = () => {
     document.getElementById('about-text').textContent = topTextRes.text || '（未設定）';
 
     // シロクマン動画（大宮のみ）
-    // base64エンコードされた動画データをvideoタグのsrcに設定してloop再生
-    // margin-topを動的計算してテキストの最下段に揃える
-    if (shiroRes && shiroRes.url) {
+    // localStorageにキャッシュして2回目以降は即座に表示
+    const shiroVer = cfg.shiro_version || '1';
+    const _applyShiroVideo = (dataUrl) => {
       const wrap  = document.getElementById('shiro-wrap');
       const video = document.getElementById('shiro-video');
-      if (wrap && video) {
-        video.src = shiroRes.url;
-        video.play().catch(() => {});
-        wrap.style.display = 'block';
-        // テキスト高さが確定した後にmargin-topを調整
-        requestAnimationFrame(() => {
-          const aboutEl   = document.getElementById('about-text');
-          const textH     = aboutEl ? aboutEl.offsetHeight : 0;
-          const videoH    = wrap.offsetHeight;
-          const marginTop = Math.max(0, textH - videoH);
-          wrap.style.marginTop = marginTop + 'px';
-        });
+      if (!wrap || !video || !dataUrl) return;
+      video.src = dataUrl;
+      video.play().catch(() => {});
+      wrap.style.display = 'block';
+      requestAnimationFrame(() => {
+        const aboutEl   = document.getElementById('about-text');
+        const textH     = aboutEl ? aboutEl.offsetHeight : 0;
+        const videoH    = wrap.offsetHeight;
+        wrap.style.marginTop = Math.max(0, textH - videoH) + 'px';
+      });
+    };
+
+    // キャッシュ確認（バージョンが一致すればキャッシュを使用）
+    let shiroCached = null;
+    try {
+      const cachedVer = localStorage.getItem(getShiroVerKey());
+      if (cachedVer === shiroVer) {
+        shiroCached = localStorage.getItem(getShiroLsKey());
       }
+    } catch (_) {}
+
+    if (shiroCached) {
+      // キャッシュあり → 即座に表示
+      _applyShiroVideo(shiroCached);
+    } else if (shiroRes && shiroRes.url) {
+      // キャッシュなし → GASから取得して表示＆キャッシュ保存
+      _applyShiroVideo(shiroRes.url);
+      try {
+        localStorage.setItem(getShiroLsKey(),  shiroRes.url);
+        localStorage.setItem(getShiroVerKey(), shiroVer);
+      } catch (_) {}
     }
 
     // 新着情報（sinchaku.txt）
@@ -1170,8 +1188,10 @@ const initPan = () => {
 // ============================================================
 let songAudio  = null;
 let songReady  = false;
-const getSongLsKey  = () => `dousoukai_song_${SITE_ID}_v1`;
-const getSongVerKey = () => `dousoukai_song_${SITE_ID}_ver_v1`;
+const getSongLsKey   = () => `dousoukai_song_${SITE_ID}_v1`;
+const getSongVerKey  = () => `dousoukai_song_${SITE_ID}_ver_v1`;
+const getShiroLsKey  = () => `dousoukai_shiro_${SITE_ID}_v1`;
+const getShiroVerKey = () => `dousoukai_shiro_${SITE_ID}_ver_v1`;
 
 const initSongPage = () => {
   // 校歌情報・歌詞を並列取得
