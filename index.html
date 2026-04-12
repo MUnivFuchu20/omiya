@@ -3,8 +3,8 @@
   ============================================================
   同窓会ホームページ index.html
   対象：宮崎県立大宮高等学校 四六会
-  最終更新：2026/04/12 12:38:04
-  更新内容：シロクマン動画localStorageキャッシュ追加
+  最終更新：2026/04/12 22:45:44
+  更新内容：表示域1・2を分離、シロクマン説明固定域追加
   ============================================================
 -->
 <html lang="ja">
@@ -141,11 +141,11 @@ body {
 .sinchaku-item:last-child { border-bottom:none; }
 .sinchaku-date { color:var(--gold);flex-shrink:0;font-size:12px;padding-top:1px;min-width:80px;display:inline-block; }
 .sinchaku-text { color:rgba(248,247,244,0.82); }
-.about-flex { display:block; }
-.shiro-wrap { float:right;margin-left:14px;width:120px;border-radius:8px;overflow:hidden; }
-.shiro-wrap video { width:120px;height:120px;border-radius:8px;object-fit:cover;display:block; }
-.about-flex::after { content:'';display:block;clear:both; }
-@media(max-width:480px){ .shiro-wrap { width:90px; } .shiro-wrap video { width:90px;height:90px; } }
+.shiro-section { display:flex;align-items:center;gap:16px;min-height:80px;margin-top:12px; }
+.shiro-section-text { flex:1;color:rgba(248,247,244,0.82);font-size:13px;line-height:1.9;font-family:'Hiragino Sans','Meiryo',sans-serif; }
+.shiro-wrap { flex-shrink:0;width:110px;border-radius:8px;overflow:hidden; }
+.shiro-wrap video { width:110px;height:110px;border-radius:8px;object-fit:cover;display:block; }
+@media(max-width:480px){ .shiro-wrap { width:85px; } .shiro-wrap video { width:85px;height:85px; } }
 
 /* ===== 校歌ページ ===== */
 .song-page { max-width:800px;margin:0 auto;padding:32px 24px 48px; }
@@ -387,12 +387,14 @@ body {
     <div class="top-content">
       <div class="top-section">
         <div class="section-title">本ホームページについて</div>
-        <div class="about-flex">
-          <!-- floatで右配置・margin-topをJSで動的調整してテキスト下揃え -->
+        <!-- 表示域1：可変域（トップページの文言.txt） -->
+        <div class="top-about-text" id="about-text">読み込み中...</div>
+        <!-- 表示域2：固定域（シロクマン説明＋動画） -->
+        <div class="shiro-section">
+          <div class="shiro-section-text"><br>アニメは大宮四六会公認キャラクターの「シロクマン」です。<br>3年G級 早川(寺田)和子さん作</div>
           <div class="shiro-wrap" id="shiro-wrap" style="display:none;">
             <video id="shiro-video" autoplay loop muted playsinline></video>
           </div>
-          <div class="top-about-text" id="about-text">読み込み中...</div>
         </div>
       </div>
       <div class="section-divider"></div>
