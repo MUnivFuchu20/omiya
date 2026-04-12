@@ -3,8 +3,8 @@
   ============================================================
   同窓会ホームページ index.html
   対象：宮崎県立大宮高等学校 四六会
-  最終更新：2026/04/12 11:44:09
-  更新内容：新着情報順序修正・シロクマン動画iframe方式に変更
+  最終更新：2026/04/12 11:53:12
+  更新内容：新着情報日付揃え修正・動画base64方式に変更
   ============================================================
 -->
 <html lang="ja">
@@ -141,9 +141,9 @@ body {
 .sinchaku-item:last-child { border-bottom:none; }
 .sinchaku-date { color:var(--gold);flex-shrink:0;font-size:12px;padding-top:1px; }
 .sinchaku-text { color:rgba(248,247,244,0.82); }
-.shiro-wrap { float:right;margin:0 0 12px 16px;width:180px;border-radius:8px;overflow:hidden; }
-.shiro-wrap iframe { width:180px;height:320px;border:none;border-radius:8px; }
-@media(max-width:480px){ .shiro-wrap { width:120px;margin:0 0 8px 10px; } .shiro-wrap iframe { width:120px;height:213px; } }
+.shiro-wrap { float:right;margin:0 0 12px 16px;width:160px;border-radius:8px;overflow:hidden; }
+.shiro-wrap video { width:160px;height:160px;border-radius:8px;object-fit:cover; }
+@media(max-width:480px){ .shiro-wrap { width:110px;margin:0 0 8px 10px; } .shiro-wrap video { width:110px;height:110px; } }
 
 /* ===== 校歌ページ ===== */
 .song-page { max-width:800px;margin:0 auto;padding:32px 24px 48px; }
@@ -385,9 +385,9 @@ body {
     <div class="top-content">
       <div class="top-section">
         <div class="section-title">本ホームページについて</div>
-        <!-- シロクマン動画（テキストの右側にfloat・iframeで埋め込み） -->
+        <!-- シロクマン動画（テキストの右側にfloat・base64で埋め込み） -->
         <div class="shiro-wrap" id="shiro-wrap" style="display:none;">
-          <iframe id="shiro-video" allow="autoplay" allowfullscreen></iframe>
+          <video id="shiro-video" autoplay loop muted playsinline></video>
         </div>
         <div class="top-about-text" id="about-text">読み込み中...</div>
         <div style="clear:both;"></div>
@@ -813,13 +813,13 @@ const initTopPage = () => {
     document.getElementById('about-text').textContent = topTextRes.text || '（未設定）';
 
     // シロクマン動画（大宮のみ）
-    // GoogleドライブのfileIdをiframeのpreviewURLに設定してLoop再生
+    // base64エンコードされた動画データをvideoタグのsrcに設定してloop再生
     if (shiroRes && shiroRes.url) {
-      const wrap   = document.getElementById('shiro-wrap');
-      const iframe = document.getElementById('shiro-video');
-      if (wrap && iframe) {
-        // /previewはGoogleドライブの動画プレビューURL（自動再生・ループ対応）
-        iframe.src = `https://drive.google.com/file/d/${shiroRes.url}/preview?autoplay=1&loop=1`;
+      const wrap  = document.getElementById('shiro-wrap');
+      const video = document.getElementById('shiro-video');
+      if (wrap && video) {
+        video.src = shiroRes.url;  // data:video/mp4;base64,... 形式
+        video.play().catch(() => {});
         wrap.style.display = 'block';
       }
     }
@@ -842,12 +842,16 @@ const initTopPage = () => {
     if (sinchakuItems.length === 0) {
       sinchakuBox.innerHTML = '<div class="kaisai-empty">新着情報はありません</div>';
     } else {
-      sinchakuBox.innerHTML = sinchakuItems.map((item, i) =>
-        `<div class="sinchaku-item${i >= 2 ? ' sinchaku-old' : ''}">
-          <span class="sinchaku-date">${escHtml(item.date)}</span>
+      // 同じ日付が連続する場合、2行目以降の日付欄は空白にして揃える
+      let lastDate = '';
+      sinchakuBox.innerHTML = sinchakuItems.map((item, i) => {
+        const showDate = item.date && item.date !== lastDate;
+        if (item.date) lastDate = item.date;
+        return `<div class="sinchaku-item${i >= 2 ? ' sinchaku-old' : ''}">
+          <span class="sinchaku-date">${showDate ? escHtml(item.date) : ''}</span>
           <span class="sinchaku-text">${item.text}</span>
-        </div>`
-      ).join('');
+        </div>`;
+      }).join('');
     }
 
     // 開催同窓会一覧
