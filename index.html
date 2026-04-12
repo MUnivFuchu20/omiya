@@ -3,8 +3,8 @@
   ============================================================
   同窓会ホームページ index.html
   対象：宮崎県立大宮高等学校 四六会
-  最終更新：2026/04/12 12:24:15
-  更新内容：シロクマンをCSS gridで右下揃えに変更
+  最終更新：2026/04/12 12:28:33
+  更新内容：シロクマンfloat回り込み＋JS下揃え
   ============================================================
 -->
 <html lang="ja">
@@ -141,10 +141,11 @@ body {
 .sinchaku-item:last-child { border-bottom:none; }
 .sinchaku-date { color:var(--gold);flex-shrink:0;font-size:12px;padding-top:1px;min-width:80px;display:inline-block; }
 .sinchaku-text { color:rgba(248,247,244,0.82); }
-.about-flex { display:grid;grid-template-columns:1fr 120px;gap:16px;align-items:end; }
-.shiro-wrap { width:120px;border-radius:8px;overflow:hidden; }
+.about-flex { display:block; }
+.shiro-wrap { float:right;margin-left:14px;width:120px;border-radius:8px;overflow:hidden; }
 .shiro-wrap video { width:120px;height:120px;border-radius:8px;object-fit:cover;display:block; }
-@media(max-width:480px){ .about-flex { grid-template-columns:1fr 90px;gap:10px; } .shiro-wrap { width:90px; } .shiro-wrap video { width:90px;height:90px; } }
+.about-flex::after { content:'';display:block;clear:both; }
+@media(max-width:480px){ .shiro-wrap { width:90px; } .shiro-wrap video { width:90px;height:90px; } }
 
 /* ===== 校歌ページ ===== */
 .song-page { max-width:800px;margin:0 auto;padding:32px 24px 48px; }
@@ -387,11 +388,11 @@ body {
       <div class="top-section">
         <div class="section-title">本ホームページについて</div>
         <div class="about-flex">
-          <!-- テキスト左・シロクマン動画右下揃え（CSS gridで制御） -->
-          <div class="top-about-text" id="about-text">読み込み中...</div>
+          <!-- floatで右配置・margin-topをJSで動的調整してテキスト下揃え -->
           <div class="shiro-wrap" id="shiro-wrap" style="display:none;">
             <video id="shiro-video" autoplay loop muted playsinline></video>
           </div>
+          <div class="top-about-text" id="about-text">読み込み中...</div>
         </div>
       </div>
       <div class="section-divider"></div>
@@ -816,13 +817,22 @@ const initTopPage = () => {
 
     // シロクマン動画（大宮のみ）
     // base64エンコードされた動画データをvideoタグのsrcに設定してloop再生
+    // margin-topを動的計算してテキストの最下段に揃える
     if (shiroRes && shiroRes.url) {
       const wrap  = document.getElementById('shiro-wrap');
       const video = document.getElementById('shiro-video');
       if (wrap && video) {
-        video.src = shiroRes.url;  // data:video/mp4;base64,... 形式
+        video.src = shiroRes.url;
         video.play().catch(() => {});
         wrap.style.display = 'block';
+        // テキスト高さが確定した後にmargin-topを調整
+        requestAnimationFrame(() => {
+          const aboutEl   = document.getElementById('about-text');
+          const textH     = aboutEl ? aboutEl.offsetHeight : 0;
+          const videoH    = wrap.offsetHeight;
+          const marginTop = Math.max(0, textH - videoH);
+          wrap.style.marginTop = marginTop + 'px';
+        });
       }
     }
 
