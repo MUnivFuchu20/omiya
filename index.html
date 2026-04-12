@@ -3,8 +3,8 @@
   ============================================================
   同窓会ホームページ index.html
   対象：宮崎県立大宮高等学校 四六会
-  最終更新：2026/04/09 00:07:24
-  更新内容：XSS対策（escHtml）追加
+  最終更新：2026/04/12 11:34:21
+  更新内容：シロクマン動画・新着情報追加
   ============================================================
 -->
 <html lang="ja">
@@ -136,6 +136,14 @@ body {
 .feedback-btn { display:block;width:100%;background:none;border:1px solid rgba(201,168,76,0.35);border-radius:var(--radius);color:var(--gold);font-size:14px;letter-spacing:0.12em;padding:16px;cursor:pointer;transition:all 0.2s;font-family:'Hiragino Sans','Meiryo',sans-serif;text-align:center; }
 .feedback-btn:hover { background:rgba(201,168,76,0.08);border-color:var(--gold); }
 .section-divider { height:1px;background:linear-gradient(to right,transparent,rgba(201,168,76,0.15),transparent);margin:32px auto 0;max-width:720px; }
+.sinchaku-box { background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.15);border-radius:var(--radius);padding:12px 16px;max-height:120px;overflow-y:auto;font-family:'Hiragino Sans','Meiryo',sans-serif; }
+.sinchaku-item { display:flex;gap:12px;padding:4px 0;border-bottom:1px solid rgba(201,168,76,0.08);font-size:13px;line-height:1.6; }
+.sinchaku-item:last-child { border-bottom:none; }
+.sinchaku-date { color:var(--gold);flex-shrink:0;font-size:12px;padding-top:1px; }
+.sinchaku-text { color:rgba(248,247,244,0.82); }
+.shiro-wrap { float:right;margin:0 0 12px 16px;width:180px; }
+.shiro-wrap video { width:100%;border-radius:8px;opacity:0.92; }
+@media(max-width:480px){ .shiro-wrap { width:120px;margin:0 0 8px 10px; } }
 
 /* ===== 校歌ページ ===== */
 .song-page { max-width:800px;margin:0 auto;padding:32px 24px 48px; }
@@ -377,7 +385,17 @@ body {
     <div class="top-content">
       <div class="top-section">
         <div class="section-title">本ホームページについて</div>
+        <!-- シロクマン動画（テキストの右側にfloat） -->
+        <div class="shiro-wrap" id="shiro-wrap" style="display:none;">
+          <video id="shiro-video" autoplay loop muted playsinline></video>
+        </div>
         <div class="top-about-text" id="about-text">読み込み中...</div>
+        <div style="clear:both;"></div>
+      </div>
+      <div class="section-divider"></div>
+      <div class="top-section">
+        <div class="section-title">新着情報</div>
+        <div class="sinchaku-box" id="sinchaku-box"><div class="kaisai-empty">読み込み中...</div></div>
       </div>
       <div class="section-divider"></div>
       <div class="top-section">
@@ -769,8 +787,10 @@ const initTopPage = () => {
     gasApi('topText'),
     gasApi('kaisaiList'),
     gasApi('nextKaisai'),
-    gasApi('config')
-  ]).then(([headerRes, topTextRes, kaisaiRes, nextRes, cfg]) => {
+    gasApi('config'),
+    gasApi('sinchaku'),
+    gasApi('shiroVideo')
+  ]).then(([headerRes, topTextRes, kaisaiRes, nextRes, cfg, sinchakuRes, shiroRes]) => {
 
     // ヘッダー背景画像（config.iniのschool_pictureを使用）
     if (headerRes.url) {
@@ -791,6 +811,42 @@ const initTopPage = () => {
 
     // 本HPについてテキスト
     document.getElementById('about-text').textContent = topTextRes.text || '（未設定）';
+
+    // シロクマン動画（大宮のみ）
+    if (shiroRes && shiroRes.url) {
+      const wrap  = document.getElementById('shiro-wrap');
+      const video = document.getElementById('shiro-video');
+      if (wrap && video) {
+        video.src = shiroRes.url;
+        wrap.style.display = 'block';
+      }
+    }
+
+    // 新着情報（sinchaku.txt）
+    // 書式：日付[TAB]内容（1行1件）最新2件を折り畳み表示、全件スクロール可能
+    const sinchakuBox = document.getElementById('sinchaku-box');
+    const sinchakuRaw = (sinchakuRes && sinchakuRes.text) ? sinchakuRes.text : '';
+    const sinchakuItems = sinchakuRaw
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => l && !l.startsWith(';'))
+      .map(l => {
+        const tab = l.indexOf('\t');
+        return tab >= 0
+          ? { date: l.substring(0, tab).trim(), text: escHtml(l.substring(tab + 1).trim()) }
+          : { date: '', text: escHtml(l) };
+      })
+      .reverse();  // 新着順（末尾が最新）
+    if (sinchakuItems.length === 0) {
+      sinchakuBox.innerHTML = '<div class="kaisai-empty">新着情報はありません</div>';
+    } else {
+      sinchakuBox.innerHTML = sinchakuItems.map((item, i) =>
+        `<div class="sinchaku-item${i >= 2 ? ' sinchaku-old' : ''}">
+          <span class="sinchaku-date">${escHtml(item.date)}</span>
+          <span class="sinchaku-text">${item.text}</span>
+        </div>`
+      ).join('');
+    }
 
     // 開催同窓会一覧
     const c    = document.getElementById('kaisai-list');
