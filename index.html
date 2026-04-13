@@ -3,8 +3,8 @@
   ============================================================
   同窓会ホームページ index.html
   対象：宮崎県立大宮高等学校 四六会
-  最終更新：2026/04/13 01:06:04
-  更新内容：shiro-section-textにmax-width追加で動画スペース確保
+  最終更新：2026/04/13 01:58:14
+  更新内容：margin-top動的設定を完全削除
   ============================================================
 -->
 <html lang="ja">
@@ -831,12 +831,6 @@ const initTopPage = () => {
       video.src = dataUrl;
       video.play().catch(() => {});
       video.style.display = 'block';
-      requestAnimationFrame(() => {
-        const aboutEl   = document.getElementById('about-text');
-        const textH     = aboutEl ? aboutEl.offsetHeight : 0;
-        const videoH    = wrap.offsetHeight;
-        wrap.style.marginTop = Math.max(0, textH - videoH) + 'px';
-      });
     };
 
     // キャッシュ確認（バージョンが一致すればキャッシュを使用）
