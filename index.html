@@ -3,8 +3,8 @@
   ============================================================
   同窓会ホームページ index.html
   対象：宮崎県立大宮高等学校 四六会
-  最終更新：2026/04/13 00:39:31
-  更新内容：shiro-wrapに高さ明示・スマホサイズ80pxに調整
+  最終更新：2026/04/13 00:45:13
+  更新内容：shiro-wrap常時サイズ確保・プレースホルダー表示
   ============================================================
 -->
 <html lang="ja">
@@ -143,8 +143,8 @@ body {
 .sinchaku-text { color:rgba(248,247,244,0.82); }
 .shiro-section { display:flex;align-items:center;gap:12px;min-height:80px;margin-top:12px; }
 .shiro-section-text { flex:1;color:rgba(248,247,244,0.82);font-size:13px;line-height:1.9;font-family:'Hiragino Sans','Meiryo',sans-serif;min-width:0; }
-.shiro-wrap { flex-shrink:0;width:110px;height:110px;border-radius:8px;overflow:hidden;background:transparent; }
-.shiro-wrap video { width:110px;height:110px;border-radius:8px;object-fit:cover;display:block; }
+.shiro-wrap { flex-shrink:0;width:110px;height:110px;border-radius:8px;overflow:hidden;background:rgba(255,255,255,0.05); }
+.shiro-wrap video { width:110px;height:110px;border-radius:8px;object-fit:cover;display:none; }
 @media(max-width:480px){
   .shiro-section { gap:6px; }
   .shiro-section-text { font-size:12px;line-height:1.7; }
@@ -398,7 +398,7 @@ body {
         <div class="shiro-section">
           <div class="shiro-section-text"><br>アニメは大宮四六会公認キャラクターの「シロクマン」です。<br>3年G級 早川(寺田)和子さん作</div>
           <div class="shiro-wrap" id="shiro-wrap">
-            <video id="shiro-video" autoplay loop muted playsinline style="display:none;"></video>
+            <video id="shiro-video" autoplay loop muted playsinline></video>
           </div>
         </div>
       </div>
@@ -832,6 +832,8 @@ const initTopPage = () => {
       video.src = dataUrl;
       video.play().catch(() => {});
       video.style.display = 'block';
+      video.style.width = '100%';
+      video.style.height = '100%';
       requestAnimationFrame(() => {
         const aboutEl   = document.getElementById('about-text');
         const textH     = aboutEl ? aboutEl.offsetHeight : 0;
