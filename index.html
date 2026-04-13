@@ -3,8 +3,8 @@
   ============================================================
   同窓会ホームページ index.html
   対象：宮崎県立大宮高等学校 四六会
-  最終更新：2026/04/13 00:51:34
-  更新内容：videoサイズをwrap内100%で固定・JS上書き削除
+  最終更新：2026/04/13 01:06:04
+  更新内容：shiro-section-textにmax-width追加で動画スペース確保
   ============================================================
 -->
 <html lang="ja">
@@ -142,12 +142,12 @@ body {
 .sinchaku-date { color:var(--gold);flex-shrink:0;font-size:12px;padding-top:1px;min-width:80px;display:inline-block; }
 .sinchaku-text { color:rgba(248,247,244,0.82); }
 .shiro-section { display:flex;align-items:center;gap:12px;min-height:80px;margin-top:12px; }
-.shiro-section-text { flex:1;color:rgba(248,247,244,0.82);font-size:13px;line-height:1.9;font-family:'Hiragino Sans','Meiryo',sans-serif;min-width:0; }
+.shiro-section-text { flex:1;color:rgba(248,247,244,0.82);font-size:13px;line-height:1.9;font-family:'Hiragino Sans','Meiryo',sans-serif;min-width:0;max-width:calc(100% - 122px); }
 .shiro-wrap { flex-shrink:0;width:110px;height:110px;border-radius:8px;overflow:hidden;background:rgba(255,255,255,0.05); }
 .shiro-wrap video { width:100%;height:100%;object-fit:cover;display:none;border-radius:8px; }
 @media(max-width:480px){
   .shiro-section { gap:6px; }
-  .shiro-section-text { font-size:12px;line-height:1.7; }
+  .shiro-section-text { font-size:12px;line-height:1.7;max-width:calc(100% - 86px); }
   .shiro-wrap { width:80px;height:80px; }
 }
 
