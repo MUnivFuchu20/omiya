@@ -3,8 +3,8 @@
   ============================================================
   同窓会ホームページ index.html
   対象：宮崎県立大宮高等学校 四六会
-  最終更新：2026/04/12 23:48:06
-  更新内容：シロクマン説明域のスマホレイアウト修正
+  最終更新：2026/04/12 23:58:03
+  更新内容：shiro-wrap常時表示でスマホレイアウト修正
   ============================================================
 -->
 <html lang="ja">
@@ -397,8 +397,8 @@ body {
         <!-- 表示域2：固定域（シロクマン説明＋動画） -->
         <div class="shiro-section">
           <div class="shiro-section-text"><br>アニメは大宮四六会公認キャラクターの「シロクマン」です。<br>3年G級 早川(寺田)和子さん作</div>
-          <div class="shiro-wrap" id="shiro-wrap" style="display:none;">
-            <video id="shiro-video" autoplay loop muted playsinline></video>
+          <div class="shiro-wrap" id="shiro-wrap">
+            <video id="shiro-video" autoplay loop muted playsinline style="display:none;"></video>
           </div>
         </div>
       </div>
@@ -831,7 +831,7 @@ const initTopPage = () => {
       if (!wrap || !video || !dataUrl) return;
       video.src = dataUrl;
       video.play().catch(() => {});
-      wrap.style.display = 'block';
+      video.style.display = 'block';
       requestAnimationFrame(() => {
         const aboutEl   = document.getElementById('about-text');
         const textH     = aboutEl ? aboutEl.offsetHeight : 0;
