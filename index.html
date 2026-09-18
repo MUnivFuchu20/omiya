@@ -331,6 +331,235 @@ body {
 #site-footer { background:var(--navy);border-top:1px solid rgba(201,168,76,0.18);padding:16px 24px;text-align:center;font-family:'Hiragino Sans','Meiryo',sans-serif; }
 #site-footer p { color:rgba(248,247,244,0.5);font-size:12px;line-height:1.8; }
 #site-footer a { color:rgba(201,168,76,0.7);text-decoration:none; }
+
+/* ============================================================
+   印刷用スタイル（@media print）
+   ホーム画面・写真集ページを案内文書に貼り付ける際に
+   背景を白系・文字を黒系に変換してインクを節約する
+   ============================================================ */
+@media print {
+  /* CSSカラー変数を印刷用に上書き */
+  :root {
+    --navy:      #ffffff;
+    --navy-mid:  #f0f0f0;
+    --aoi:       #cccccc;
+    --aoi-light: #999999;
+    --gold:      #664400;
+    --white:     #111111;
+  }
+
+  /* 基本リセット */
+  body {
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+
+  /* ヘッダー */
+  #site-header {
+    background: #ffffff !important;
+    border-bottom: 1px solid #999999 !important;
+    position: static !important;
+  }
+  .site-title { color: #333333 !important; }
+  .site-title small { color: #666666 !important; }
+
+  /* ローディング・ログイン画面は印刷不要 */
+  #overlay-init { display: none !important; }
+  #page-login   { display: none !important; }
+
+  /* ホームページ: 背景グラデーション除去 */
+  #page-home {
+    background: #ffffff !important;
+  }
+
+  /* 学校写真エリア */
+  .header-photo-wrap { border: 1px solid #cccccc !important; }
+
+  /* 写真上のタイトル文字は白文字を維持（写真背景の上なので白の方が読みやすい） */
+  .top-hero-text h2 { color: #ffffff !important; }
+  .top-hero-text p  { color: #f0c060 !important; }  /* 英文は金色系を維持 */
+
+  /* 新着情報 */
+  .sinchaku-section {
+    background: #f8f8f8 !important;
+    border: 1px solid #cccccc !important;
+  }
+  .sinchaku-title { color: #333333 !important; }
+  .sinchaku-item { border-bottom: 1px solid #dddddd !important; }
+  .sinchaku-date { color: #666666 !important; }
+  .sinchaku-text { color: #222222 !important; }
+
+  /* ホームカード */
+  .home-hero {
+    background: #f8f8f8 !important;
+    border: 1px solid #cccccc !important;
+  }
+  .home-hero h2 { color: #333333 !important; }
+  .home-hero p  { color: #444444 !important; }
+
+  /* ナビゲーションボタン */
+  .nav-grid { gap: 8px !important; }
+  .nav-card {
+    background: #f0f0f0 !important;
+    border: 1px solid #999999 !important;
+    box-shadow: none !important;
+  }
+  .nav-card-icon  { color: #444444 !important; }
+  .nav-card-label { color: #222222 !important; }
+  .nav-card-sub   { color: #666666 !important; }
+
+  /* セクション共通 */
+  .section-title  { color: #333333 !important; border-bottom-color: #999999 !important; }
+  .section-header { color: #333333 !important; border-bottom-color: #999999 !important; }
+
+  /* 同窓会開催一覧 */
+  .event-list-page {
+    background: #ffffff !important;
+  }
+  .event-item {
+    background: #f8f8f8 !important;
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+  }
+  .event-year    { color: #664400 !important; }
+  .event-name    { color: #222222 !important; }
+  .event-date    { color: #555555 !important; }
+  .event-venue   { color: #555555 !important; }
+  .event-summary { color: #444444 !important; }
+
+  /* 写真集ページ */
+  .album-page {
+    background: #ffffff !important;
+  }
+  .album-section {
+    background: #f8f8f8 !important;
+    border: 1px solid #cccccc !important;
+  }
+  .album-caption { color: #444444 !important; }
+  .photo-grid-item { border: 1px solid #dddddd !important; }
+
+  /* PDFページ */
+  .pdf-page {
+    background: #ffffff !important;
+  }
+  .pdf-item {
+    background: #f8f8f8 !important;
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+  }
+  .pdf-title { color: #333333 !important; }
+
+  /* 校歌ページ */
+  .song-page {
+    background: #ffffff !important;
+  }
+  .song-card {
+    background: #f8f8f8 !important;
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+  }
+  .song-title    { color: #333333 !important; }
+  .song-meta     { color: #666666 !important; }
+  .lyric-block   { color: #222222 !important; border-left-color: #999999 !important; }
+  .lyric-num     { color: #664400 !important; }
+  .song-content  { color: #666666 !important; }
+
+  /* シロクマン動画（大宮のみ） */
+  .shiro-section { background: #f8f8f8 !important; border: 1px solid #cccccc !important; }
+  .shiro-title   { color: #333333 !important; }
+  .shiro-video-area { display: none !important; }  /* 動画は印刷不要 */
+
+  /* 同窓生投稿写真（大宮のみ） */
+  .post-page { background: #ffffff !important; }
+  .post-card {
+    background: #f8f8f8 !important;
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+  }
+  .post-name    { color: #333333 !important; }
+  .post-comment { color: #444444 !important; }
+  .post-date    { color: #888888 !important; }
+
+  /* ご感想フォームは印刷不要 */
+  #page-feedback { display: none !important; }
+
+  /* フッター */
+  #site-footer {
+    background: #f0f0f0 !important;
+    border-top: 1px solid #cccccc !important;
+  }
+  #site-footer p { color: #666666 !important; }
+  #site-footer a { color: #664400 !important; }
+
+  /* ============================================================
+     rgba直接指定の白系文字色を黒系に上書き
+     CSS変数経由でない色指定はこちらで個別対応
+     ============================================================ */
+
+  /* ホームページ本文・説明テキスト */
+  .top-about-text      { color: #222222 !important; }
+  .next-kaisai-box p   { color: #333333 !important; }
+  .next-kaisai-box     { background: #f0f0f0 !important; border-color: #cccccc !important; }
+
+  /* 新着情報 */
+  .sinchaku-text       { color: #222222 !important; }
+
+  /* 校歌 */
+  .song-credits        { color: #555555 !important; }
+  .song-content        { color: #555555 !important; }
+  .song-sub            { color: #666666 !important; }
+  .lyrics-block p      { color: #222222 !important; }
+  .player-time         { color: #666666 !important; }
+  .player-status       { color: #666666 !important; }
+
+  /* 実行委員長挨拶 */
+  .greeting-box p      { color: #222222 !important; }
+
+  /* 開催一覧 */
+  .kaisai-empty        { color: #666666 !important; }
+
+  /* 同窓生投稿（大宮） */
+  .post-comment        { color: #222222 !important; }
+  .post-date           { color: #888888 !important; }
+  .post-empty          { color: #666666 !important; }
+
+  /* PDFリスト */
+  .pdf-item            { color: #222222 !important; background: #f8f8f8 !important; border-color: #cccccc !important; }
+  .photo-count         { color: #666666 !important; }
+
+  /* ビューア */
+  .viewer-filename     { color: #555555 !important; }
+  .viewer-counter      { color: #555555 !important; }
+  .zoom-level          { color: #666666 !important; }
+
+  /* ご感想フォーム */
+  .disclose-row label  { color: #333333 !important; }
+  .form-note           { color: #666666 !important; }
+  .confirm-table td    { color: #222222 !important; }
+
+  /* インラインstyleで指定された白系文字も強制上書き */
+  [style*="rgba(248,247,244"] { color: #333333 !important; }
+  [style*="rgba(201,168,76"]  { color: #664400 !important; }
+
+  /* ログインカード（印刷対象外だが念のため） */
+  .login-note          { color: #555555 !important; }
+
+  /* シロクマン（大宮のみ） */
+  .shiro-desc          { color: #444444 !important; }
+
+  /* 装飾・アニメーション除去 */
+  * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* ページ区切り設定 */
+  .event-item { page-break-inside: avoid; }
+  .photo-grid-item { page-break-inside: avoid; }
+  .post-card { page-break-inside: avoid; }
+}
 </style>
 </head>
 <body>
