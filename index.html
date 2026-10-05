@@ -1021,6 +1021,8 @@ const initTopPage = () => {
   if (topInitialized) return;
   topInitialized = true;
 
+  gasApi('logAccess').catch(() => {});   // アクセスログ記録
+
   Promise.all([
     gasApi('headerImage'),
     gasApi('topText'),
