@@ -1021,7 +1021,14 @@ const initTopPage = () => {
   if (topInitialized) return;
   topInitialized = true;
 
-  gasApi('logAccess').catch(() => {});   // アクセスログ記録
+  // アクセスログ記録（当日同一端末は1回のみ）
+  const _jst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const _today = `${_jst.getUTCFullYear()}/${String(_jst.getUTCMonth()+1).padStart(2,'0')}/${String(_jst.getUTCDate()).padStart(2,'0')}`;
+  const _logKey = `access_logged_${_today}`;
+  if (!localStorage.getItem(_logKey)) {
+    gasApi('logAccess').catch(() => {});
+    localStorage.setItem(_logKey, '1');
+  }
 
   Promise.all([
     gasApi('headerImage'),
